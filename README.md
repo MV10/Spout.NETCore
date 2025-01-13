@@ -8,8 +8,9 @@ Heavily inspired by https://github.com/Ruminoid/Spout.NET but dotnet core 8 comp
 
 Needs an OpenGL Runtime like [OpenGL.Net](https://www.nuget.org/packages/OpenGL.Net/) to run.
 
-Feel free to contribute to fix any bugs if anything comes up, I'll try to release this as a package on nuget.org.
+Feel free to contribute to fix any bugs if anything comes up.
 
+[nuget package](https://www.nuget.org/packages/Spout.NETCore/)
 
 Sample Code (same as .net framework variant):
 ```cs
