@@ -3,11 +3,13 @@
     How to generate updated bindings:
 
     1. Clone the Spout2 repository from https://github.com/leadedge/Spout2
-    2. In the code below, set SpoutSourcePath to SpoutGL in the local Spout2 clone
-    3. Copy the matching-version Spout.DLL to the cloned SpoutGL directory
-    4. Create an "output" directory inside the cloned SpoutGL directory
-    5. Run this program to generate the bindings
-    6. Generated bindings will be in the "output" directory, copy to Spout.NETCore
+    2. Copy the latest Spout.DLL to the Spout.NETCore project directory
+    3. In the code below:
+    4.   Set SpoutNetCorePath to the Spout.NETCore project directory
+    5.   Set SpoutHeaderPath to the SpoutGL directory in the local Spout2 clone
+    6. Run this program to update Spout.Interop.cs and Std.cs
+    7. The generated *.cpp files are in gitignore and will not be checked in
+    8. Update the Spout.NETCore.csproj version to match the Spout.DLL version
 */
 
 // Currently CppSharp is not compatible with Clang 19 shipping with
@@ -30,7 +32,10 @@ namespace GenerateBindings;
 public class CppSharpLibrary : ILibrary
 {
     // update to match your Spout2 repo clone path
-    const string SpoutSourcePath = @"C:\Source\Repos\Spout2\SPOUTSDK\SpoutGL\";
+    const string SpoutHeaderPath = @"C:\Source\Repos\Spout2\SPOUTSDK\SpoutGL\";
+    
+    // update to match your Spout.NETCore path (the Spout.NETCore.csproj location)
+    const string SpoutNETCorePath = @"C:\Source\Repos\Spout.NETCore\Spout.NETCore\";
 
     public void Preprocess(Driver driver, ASTContext ctx)
     { }
@@ -45,19 +50,19 @@ public class CppSharpLibrary : ILibrary
 
         var options = driver.Options;
         options.GeneratorKind = GeneratorKind.CSharp;
-        options.OutputDir = $"{SpoutSourcePath}output";
+        options.OutputDir = SpoutNETCorePath;
         options.Compilation.Platform = TargetPlatform.Windows;
         options.Compilation.VsVersion = VisualStudioVersion.Latest;
         options.GenerateFinalizers = true;
         options.GenerationOutputMode = GenerationOutputMode.FilePerModule;
 
         var module = options.AddModule("Spout.Interop");
-        module.IncludeDirs.Add(SpoutSourcePath);
-        foreach (string file in Directory.GetFiles(SpoutSourcePath))
+        module.IncludeDirs.Add(SpoutHeaderPath);
+        foreach (string file in Directory.GetFiles(SpoutHeaderPath))
         {
             if (file.EndsWith(".h")) module.Headers.Add(file);
         }
-        module.LibraryDirs.Add(SpoutSourcePath);
+        module.LibraryDirs.Add(SpoutNETCorePath);
         module.Libraries.Add("Spout.dll"); // in Spout2 repo's SpoutGL directory
     }
 
