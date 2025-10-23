@@ -16,7 +16,7 @@ namespace Spout.Interop
 {
     public unsafe partial class Spout : global::Spout.Interop.SpoutGL, IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 1976)]
+        [StructLayout(LayoutKind.Sequential, Size = 2008)]
         public new partial struct __Internal
         {
             internal __IntPtr vfptr_spoutGL;
@@ -25,10 +25,13 @@ namespace Spout.Interop
             internal global::Spout.Interop.SpoutSenderNames.__Internal sendernames;
             internal global::Spout.Interop.SpoutFrameCount.__Internal frame;
             internal global::Spout.Interop.SpoutSharedMemory.__Internal memoryshare;
+            internal int m_nBuffers;
             internal fixed uint m_pbo[4];
             internal int PboIndex;
             internal int NextPboIndex;
-            internal int m_nBuffers;
+            internal fixed uint m_loadpbo[4];
+            internal int PboLoadIndex;
+            internal int NextPboLoadIndex;
             internal fixed long m_pStaging[2];
             internal int m_Index;
             internal int m_NextIndex;
@@ -41,6 +44,8 @@ namespace Spout.Interop
             internal uint m_TexWidth;
             internal uint m_TexHeight;
             internal uint m_TexFormat;
+            internal uint m_DestWidth;
+            internal uint m_DestHeight;
             internal uint m_glTexture;
             internal __IntPtr m_pSharedTexture;
             internal __IntPtr m_dxShareHandle;
@@ -57,8 +62,7 @@ namespace Spout.Interop
             internal byte m_bConnected;
             internal byte m_bUpdated;
             internal byte m_bInitialized;
-            internal byte m_bMirror;
-            internal byte m_bSwapRB;
+            internal byte m_bSender;
             internal byte m_bGLDXdone;
             internal byte m_bAuto;
             internal byte m_bCPU;
@@ -128,6 +132,9 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool ReceiveImage(__IntPtr __instance, byte* pixels, uint glFormat, bool bInvert, uint HostFbo);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSenderIndex@Spout@@QEAAHPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int GetSenderIndex(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string sendername);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?SetFrameCount@Spout@@QEAAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void SetFrameCount(__IntPtr __instance, bool bEnable);
 
@@ -138,7 +145,7 @@ namespace Spout.Interop
             internal static extern void HoldFps(__IntPtr __instance, int fps);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?SetFrameSync@Spout@@QEAAXPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
-            internal static extern void SetFrameSync(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string SenderName);
+            internal static extern void SetFrameSync(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string name);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WaitFrameSync@Spout@@QEAA_NPEBDK@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -146,6 +153,9 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableFrameSync@Spout@@QEAAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void EnableFrameSync(__IntPtr __instance, bool bSync);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CloseFrameSync@Spout@@QEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void CloseFrameSync(__IntPtr __instance);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSender@Spout@@QEAA_NHPEADH@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -511,6 +521,12 @@ namespace Spout.Interop
             return ___ret;
         }
 
+        public int GetSenderIndex(string sendername)
+        {
+            var ___ret = __Internal.GetSenderIndex(__Instance, sendername);
+            return ___ret;
+        }
+
         public void SetFrameCount(bool bEnable)
         {
             __Internal.SetFrameCount(__Instance, bEnable);
@@ -526,9 +542,9 @@ namespace Spout.Interop
             __Internal.HoldFps(__Instance, fps);
         }
 
-        public void SetFrameSync(string SenderName)
+        public void SetFrameSync(string name)
         {
-            __Internal.SetFrameSync(__Instance, SenderName);
+            __Internal.SetFrameSync(__Instance, name);
         }
 
         public bool WaitFrameSync(string SenderName, uint dwTimeout)
@@ -540,6 +556,11 @@ namespace Spout.Interop
         public void EnableFrameSync(bool bSync)
         {
             __Internal.EnableFrameSync(__Instance, bSync);
+        }
+
+        public void CloseFrameSync()
+        {
+            __Internal.CloseFrameSync(__Instance);
         }
 
         public bool GetSender(int index, sbyte* sendername, int MaxSize)
@@ -1137,8 +1158,11 @@ namespace Spout.Interop
         {
             public partial struct __Internal
             {
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSDKversion@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void GetSDKversion(__IntPtr @return);
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSDKversion@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEAH@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void GetSDKversion(__IntPtr @return, int* number);
+
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSpoutVersion@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEAH@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void GetSpoutVersion(__IntPtr @return, int* number);
 
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?IsLaptop@spoututils@@YA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
                 [return: MarshalAs(UnmanagedType.I1)]
@@ -1147,26 +1171,26 @@ namespace Spout.Interop
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetExeVersion@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
                 internal static extern void GetExeVersion(__IntPtr @return, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string path);
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetExePath@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void GetExePath(__IntPtr @return);
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetExePath@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void GetExePath(__IntPtr @return, bool bFull);
 
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetExeName@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ", CallingConvention = __CallingConvention.Cdecl)]
                 internal static extern void GetExeName(__IntPtr @return);
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?RemovePath@spoututils@@YAXAEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void RemovePath(__IntPtr path);
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetPath@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V23@@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void GetPath(__IntPtr @return, __IntPtr fullpath);
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?RemoveName@spoututils@@YAXAEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void RemoveName(__IntPtr path);
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetName@spoututils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V23@@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void GetName(__IntPtr @return, __IntPtr fullpath);
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?OpenSpoutConsole@spoututils@@YAXXZ", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void OpenSpoutConsole();
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?OpenSpoutConsole@spoututils@@YAXPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void OpenSpoutConsole([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string title);
 
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CloseSpoutConsole@spoututils@@YAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
                 internal static extern void CloseSpoutConsole(bool bWarning);
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableSpoutLog@spoututils@@YAXXZ", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void EnableSpoutLog();
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableSpoutLog@spoututils@@YAXPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern void EnableSpoutLog([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string title);
 
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableSpoutLogFile@spoututils@@YAXPEBD_N@Z", CallingConvention = __CallingConvention.Cdecl)]
                 internal static extern void EnableSpoutLogFile([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string filename, bool bAppend);
@@ -1240,21 +1264,22 @@ namespace Spout.Interop
                 [return: MarshalAs(UnmanagedType.I1)]
                 internal static extern bool SpoutMessageBoxIcon(__IntPtr iconfile);
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?SpoutMessageBoxModeless@spoututils@@YAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern void SpoutMessageBoxModeless(bool bMode);
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?SpoutMessageBoxModeless@spoututils@@YA_N_N@Z", CallingConvention = __CallingConvention.Cdecl)]
+                [return: MarshalAs(UnmanagedType.I1)]
+                internal static extern bool SpoutMessageBoxModeless(bool bMode);
 
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?OpenSpoutLogs@spoututils@@YA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
                 [return: MarshalAs(UnmanagedType.I1)]
                 internal static extern bool OpenSpoutLogs();
 
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetRefreshRate@spoututils@@YANXZ", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern double GetRefreshRate();
+
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?StartTiming@spoututils@@YAXXZ", CallingConvention = __CallingConvention.Cdecl)]
                 internal static extern void StartTiming();
 
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EndTiming@spoututils@@YAN_N@Z", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern double EndTiming(bool microseconds);
-
-                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetRefreshRate@spoututils@@YANXZ", CallingConvention = __CallingConvention.Cdecl)]
-                internal static extern double GetRefreshRate();
+                [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EndTiming@spoututils@@YAN_N0@Z", CallingConvention = __CallingConvention.Cdecl)]
+                internal static extern double EndTiming(bool microseconds, bool bPrint);
 
                 [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ElapsedMicroseconds@spoututils@@YANXZ", CallingConvention = __CallingConvention.Cdecl)]
                 internal static extern double ElapsedMicroseconds();
@@ -1286,14 +1311,32 @@ namespace Spout.Interop
                 internal static extern bool OpenSpoutPanel([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string message);
             }
 
-            public static string GetSDKversion()
+            public static string GetSDKversion(ref int number)
             {
-                var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
-                __Internal.GetSDKversion(new IntPtr(&___ret));
-                var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
-                var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
-                __basicStringRet0.Dispose();
-                return __retString0;
+                fixed (int* __number0 = &number)
+                {
+                    var __arg0 = __number0;
+                    var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
+                    __Internal.GetSDKversion(new IntPtr(&___ret), __arg0);
+                    var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
+                    var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
+                    __basicStringRet0.Dispose();
+                    return __retString0;
+                }
+            }
+
+            public static string GetSpoutVersion(ref int number)
+            {
+                fixed (int* __number0 = &number)
+                {
+                    var __arg0 = __number0;
+                    var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
+                    __Internal.GetSpoutVersion(new IntPtr(&___ret), __arg0);
+                    var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
+                    var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
+                    __basicStringRet0.Dispose();
+                    return __retString0;
+                }
             }
 
             public static bool IsLaptop()
@@ -1312,10 +1355,10 @@ namespace Spout.Interop
                 return __retString0;
             }
 
-            public static string GetExePath()
+            public static string GetExePath(bool bFull)
             {
                 var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
-                __Internal.GetExePath(new IntPtr(&___ret));
+                __Internal.GetExePath(new IntPtr(&___ret), bFull);
                 var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
                 var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
                 __basicStringRet0.Dispose();
@@ -1332,27 +1375,37 @@ namespace Spout.Interop
                 return __retString0;
             }
 
-            public static void RemovePath(string path)
+            public static string GetPath(string fullpath)
             {
                 var __basicString0 = new global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>();
-                global::Std.BasicStringExtensions.Assign(__basicString0, path);
+                global::Std.BasicStringExtensions.Assign(__basicString0, fullpath);
                 var __arg0 = __basicString0.__Instance;
-                __Internal.RemovePath(__arg0);
-                __basicString0.Dispose();
+                var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
+                __Internal.GetPath(new IntPtr(&___ret), __arg0);
+                __basicString0.Dispose(disposing: true, callNativeDtor:false);
+                var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
+                var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
+                __basicStringRet0.Dispose();
+                return __retString0;
             }
 
-            public static void RemoveName(string path)
+            public static string GetName(string fullpath)
             {
                 var __basicString0 = new global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>();
-                global::Std.BasicStringExtensions.Assign(__basicString0, path);
+                global::Std.BasicStringExtensions.Assign(__basicString0, fullpath);
                 var __arg0 = __basicString0.__Instance;
-                __Internal.RemoveName(__arg0);
-                __basicString0.Dispose();
+                var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
+                __Internal.GetName(new IntPtr(&___ret), __arg0);
+                __basicString0.Dispose(disposing: true, callNativeDtor:false);
+                var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
+                var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
+                __basicStringRet0.Dispose();
+                return __retString0;
             }
 
-            public static void OpenSpoutConsole()
+            public static void OpenSpoutConsole(string title)
             {
-                __Internal.OpenSpoutConsole();
+                __Internal.OpenSpoutConsole(title);
             }
 
             public static void CloseSpoutConsole(bool bWarning)
@@ -1360,9 +1413,9 @@ namespace Spout.Interop
                 __Internal.CloseSpoutConsole(bWarning);
             }
 
-            public static void EnableSpoutLog()
+            public static void EnableSpoutLog(string title)
             {
-                __Internal.EnableSpoutLog();
+                __Internal.EnableSpoutLog(title);
             }
 
             public static void EnableSpoutLogFile(string filename, bool bAppend)
@@ -1501,9 +1554,10 @@ namespace Spout.Interop
                 return ___ret;
             }
 
-            public static void SpoutMessageBoxModeless(bool bMode)
+            public static bool SpoutMessageBoxModeless(bool bMode)
             {
-                __Internal.SpoutMessageBoxModeless(bMode);
+                var ___ret = __Internal.SpoutMessageBoxModeless(bMode);
+                return ___ret;
             }
 
             public static bool OpenSpoutLogs()
@@ -1512,20 +1566,20 @@ namespace Spout.Interop
                 return ___ret;
             }
 
+            public static double GetRefreshRate()
+            {
+                var ___ret = __Internal.GetRefreshRate();
+                return ___ret;
+            }
+
             public static void StartTiming()
             {
                 __Internal.StartTiming();
             }
 
-            public static double EndTiming(bool microseconds)
+            public static double EndTiming(bool microseconds, bool bPrint)
             {
-                var ___ret = __Internal.EndTiming(microseconds);
-                return ___ret;
-            }
-
-            public static double GetRefreshRate()
-            {
-                var ___ret = __Internal.GetRefreshRate();
+                var ___ret = __Internal.EndTiming(microseconds, bPrint);
                 return ___ret;
             }
 
@@ -1745,7 +1799,7 @@ namespace Spout.Interop
     public unsafe delegate void PFNGLCOPYIMAGESUBDATAPROC(uint srcName, uint srcTarget, int srcLevel, int srcX, int srcY, int srcZ, uint dstName, uint dstTarget, int dstLevel, int dstX, int dstY, int dstZ, int srcWidth, int srcHeight, int srcDepth);
 
     [SuppressUnmanagedCodeSecurity, UnmanagedFunctionPointer(__CallingConvention.Cdecl)]
-    public unsafe delegate void GlGetInternalFormativPROC(uint target, uint internalfrmat, uint pname, int buffSize, int* @params);
+    public unsafe delegate void GlGetInternalformativPROC(uint target, uint internalfrmat, uint pname, int buffSize, int* @params);
 
     [SuppressUnmanagedCodeSecurity, UnmanagedFunctionPointer(__CallingConvention.Cdecl)]
     public unsafe delegate uint GlCreateProgramPROC();
@@ -1839,6 +1893,15 @@ namespace Spout.Interop
 
     [SuppressUnmanagedCodeSecurity, UnmanagedFunctionPointer(__CallingConvention.Cdecl)]
     public unsafe delegate void GlGetMemoryObjectParameterivEXTPROC(uint memoryObject, uint pname, int* @params);
+
+    [SuppressUnmanagedCodeSecurity, UnmanagedFunctionPointer(__CallingConvention.Cdecl)]
+    public unsafe delegate byte GlIsMemoryObjectEXTPROC(uint memoryObject);
+
+    [SuppressUnmanagedCodeSecurity, UnmanagedFunctionPointer(__CallingConvention.Cdecl)]
+    public unsafe delegate void GlCreateBuffersPROC(int n, uint* buffers);
+
+    [SuppressUnmanagedCodeSecurity, UnmanagedFunctionPointer(__CallingConvention.Cdecl)]
+    public unsafe delegate void GlBindBufferBasePROC(uint target, uint index, uint buffer);
 
     public unsafe partial class GLsync
     {
@@ -1946,6 +2009,10 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool LoadCopyExtensions();
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout.Interop.dll", EntryPoint = "?loadGLmemoryExtensions@@YA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool LoadGLmemoryExtensions();
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout.Interop.dll", EntryPoint = "?loadComputeShaderExtensions@@YA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool LoadComputeShaderExtensions();
@@ -2007,6 +2074,12 @@ namespace Spout.Interop
         public static bool LoadCopyExtensions()
         {
             var ___ret = __Internal.LoadCopyExtensions();
+            return ___ret;
+        }
+
+        public static bool LoadGLmemoryExtensions()
+        {
+            var ___ret = __Internal.LoadGLmemoryExtensions();
             return ___ret;
         }
 
@@ -2705,18 +2778,18 @@ namespace Spout.Interop
             }
         }
 
-        public static global::Spout.Interop.GlGetInternalFormativPROC GlGetInternalFormativ
+        public static global::Spout.Interop.GlGetInternalformativPROC GlGetInternalformativ
         {
             get
             {
-                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glGetInternalFormativ__3P6AXIIIHPEAH_ZEA;
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glGetInternalformativ__3P6AXIIIHPEAH_ZEA;
                 var __ptr0 = *(__IntPtr*)(*__ptr);
-                return __ptr0 == IntPtr.Zero? null : (global::Spout.Interop.GlGetInternalFormativPROC) Marshal.GetDelegateForFunctionPointer(__ptr0, typeof(global::Spout.Interop.GlGetInternalFormativPROC));
+                return __ptr0 == IntPtr.Zero? null : (global::Spout.Interop.GlGetInternalformativPROC) Marshal.GetDelegateForFunctionPointer(__ptr0, typeof(global::Spout.Interop.GlGetInternalformativPROC));
             }
 
             set
             {
-                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glGetInternalFormativ__3P6AXIIIHPEAH_ZEA;
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glGetInternalformativ__3P6AXIIIHPEAH_ZEA;
                 *__ptr = value == null ? global::System.IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value);
             }
         }
@@ -3216,6 +3289,54 @@ namespace Spout.Interop
                 *__ptr = value == null ? global::System.IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value);
             }
         }
+
+        public static global::Spout.Interop.GlIsMemoryObjectEXTPROC GlIsMemoryObjectEXT
+        {
+            get
+            {
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glIsMemoryObjectEXT__3P6AEI_ZEA;
+                var __ptr0 = *(__IntPtr*)(*__ptr);
+                return __ptr0 == IntPtr.Zero? null : (global::Spout.Interop.GlIsMemoryObjectEXTPROC) Marshal.GetDelegateForFunctionPointer(__ptr0, typeof(global::Spout.Interop.GlIsMemoryObjectEXTPROC));
+            }
+
+            set
+            {
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glIsMemoryObjectEXT__3P6AEI_ZEA;
+                *__ptr = value == null ? global::System.IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value);
+            }
+        }
+
+        public static global::Spout.Interop.GlCreateBuffersPROC GlCreateBuffers
+        {
+            get
+            {
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glCreateBuffers__3P6AXHPEAI_ZEA;
+                var __ptr0 = *(__IntPtr*)(*__ptr);
+                return __ptr0 == IntPtr.Zero? null : (global::Spout.Interop.GlCreateBuffersPROC) Marshal.GetDelegateForFunctionPointer(__ptr0, typeof(global::Spout.Interop.GlCreateBuffersPROC));
+            }
+
+            set
+            {
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glCreateBuffers__3P6AXHPEAI_ZEA;
+                *__ptr = value == null ? global::System.IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value);
+            }
+        }
+
+        public static global::Spout.Interop.GlBindBufferBasePROC GlBindBufferBase
+        {
+            get
+            {
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glBindBufferBase__3P6AXIII_ZEA;
+                var __ptr0 = *(__IntPtr*)(*__ptr);
+                return __ptr0 == IntPtr.Zero? null : (global::Spout.Interop.GlBindBufferBasePROC) Marshal.GetDelegateForFunctionPointer(__ptr0, typeof(global::Spout.Interop.GlBindBufferBasePROC));
+            }
+
+            set
+            {
+                var __ptr = (__IntPtr*)global::Spout.Interop.__Symbols.Spout_Interop_dll._glBindBufferBase__3P6AXIII_ZEA;
+                *__ptr = value == null ? global::System.IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value);
+            }
+        }
     }
 
     public enum SpoutCreateResult
@@ -3685,6 +3806,9 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool GetSender(__IntPtr __instance, int index, sbyte* sendername, int MaxSize);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSenderIndex@spoutSenderNames@@QEAAHPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern int GetSenderIndex(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string sendername);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSenderNameInfo@spoutSenderNames@@QEAA_NHPEADHAEAI1AEAPEAX@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool GetSenderNameInfo(__IntPtr __instance, int index, sbyte* sendername, int sendernameMaxSize, uint* width, uint* height, __IntPtr* dxShareHandle);
@@ -3904,6 +4028,12 @@ namespace Spout.Interop
         public bool GetSender(int index, sbyte* sendername, int MaxSize)
         {
             var ___ret = __Internal.GetSender(__Instance, index, sendername, MaxSize);
+            return ___ret;
+        }
+
+        public int GetSenderIndex(string sendername)
+        {
+            var ___ret = __Internal.GetSenderIndex(__Instance, sendername);
             return ___ret;
         }
 
@@ -4549,6 +4679,10 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?SetNewFrame@spoutFrameCount@@QEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void SetNewFrame(__IntPtr __instance);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WaitNewFrame@spoutFrameCount@@QEAA_NK@Z", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool WaitNewFrame(__IntPtr __instance, uint dwTimeout);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CleanupFrameCount@spoutFrameCount@@QEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void CleanupFrameCount(__IntPtr __instance);
 
@@ -4575,6 +4709,10 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CloseFrameSync@spoutFrameCount@@QEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void CloseFrameSync(__IntPtr __instance);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CheckFrameSync@spoutFrameCount@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool CheckFrameSync(__IntPtr __instance);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableFrameSync@spoutFrameCount@@QEAAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void EnableFrameSync(__IntPtr __instance, bool bSync);
@@ -4604,6 +4742,9 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSenderFrame@spoutFrameCount@@QEAAJXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern int GetSenderFrame(__IntPtr __instance);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSenderName@spoutFrameCount@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void GetSenderName(__IntPtr __instance, __IntPtr @return);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetNewFrame@spoutFrameCount@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -4750,6 +4891,12 @@ namespace Spout.Interop
             __Internal.SetNewFrame(__Instance);
         }
 
+        public bool WaitNewFrame(uint dwTimeout)
+        {
+            var ___ret = __Internal.WaitNewFrame(__Instance, dwTimeout);
+            return ___ret;
+        }
+
         public void CleanupFrameCount()
         {
             __Internal.CleanupFrameCount(__Instance);
@@ -4791,6 +4938,12 @@ namespace Spout.Interop
         public void CloseFrameSync()
         {
             __Internal.CloseFrameSync(__Instance);
+        }
+
+        public bool CheckFrameSync()
+        {
+            var ___ret = __Internal.CheckFrameSync(__Instance);
+            return ___ret;
         }
 
         public void EnableFrameSync(bool bSync)
@@ -5096,6 +5249,19 @@ namespace Spout.Interop
             }
         }
 
+        public string SenderName
+        {
+            get
+            {
+                var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
+                __Internal.GetSenderName(__Instance, new IntPtr(&___ret));
+                var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
+                var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
+                __basicStringRet0.Dispose();
+                return __retString0;
+            }
+        }
+
         public bool NewFrame
         {
             get
@@ -5139,8 +5305,14 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?FlipBuffer@spoutCopy@@QEBAXPEBEPEAEIII@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void FlipBuffer(__IntPtr __instance, byte* src, byte* dst, uint width, uint height, uint glFormat);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?FlipBuffer@spoutCopy@@QEBAXPEAEIII@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void FlipBuffer(__IntPtr __instance, byte* src, uint width, uint height, uint glFormat);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?RemovePadding@spoutCopy@@QEBAXPEBEPEAEIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void RemovePadding(__IntPtr __instance, byte* source, byte* dest, uint width, uint height, uint source_stride, uint glFormat);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ClearAlpha@spoutCopy@@QEBAXPEAEIIE@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ClearAlpha(__IntPtr __instance, byte* src, uint width, uint height, byte alpha);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?memcpy_sse2@spoutCopy@@QEBAXPEAXPEBX_K@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void MemcpySse2(__IntPtr __instance, __IntPtr dst, __IntPtr src, ulong size);
@@ -5217,6 +5389,9 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?bgra2bgr@spoutCopy@@QEBAXPEBXPEAXII_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void Bgra2bgr(__IntPtr __instance, __IntPtr bgra_source, __IntPtr bgr_dest, uint width, uint height, bool bInvert);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSSE@spoutCopy@@QEAAXAEA_N00@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void GetSSE(__IntPtr __instance, bool* bSSE2, bool* bSSE3, bool* bSSSE3);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CheckSSE@spoutCopy@@IEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void CheckSSE(__IntPtr __instance);
 
@@ -5228,6 +5403,21 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?rgba_bgra_sse3@spoutCopy@@IEBAXPEBXPEAXII_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void RgbaBgraSse3(__IntPtr __instance, __IntPtr rgba_source, __IntPtr bgra_dest, uint width, uint height, bool bInvert);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?rgba_swap_ssse3@spoutCopy@@IEAAXPEIAXII@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void RgbaSwapSsse3(__IntPtr __instance, __IntPtr rgbasource, uint width, uint height);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSSE2@spoutCopy@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool GetSSE2(__IntPtr __instance);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSSE3@spoutCopy@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool GetSSE3(__IntPtr __instance);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSSSE3@spoutCopy@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool GetSSSE3(__IntPtr __instance);
         }
 
         public __IntPtr __Instance { get; protected set; }
@@ -5346,9 +5536,19 @@ namespace Spout.Interop
             __Internal.FlipBuffer(__Instance, src, dst, width, height, glFormat);
         }
 
+        public void FlipBuffer(byte* src, uint width, uint height, uint glFormat)
+        {
+            __Internal.FlipBuffer(__Instance, src, width, height, glFormat);
+        }
+
         public void RemovePadding(byte* source, byte* dest, uint width, uint height, uint source_stride, uint glFormat)
         {
             __Internal.RemovePadding(__Instance, source, dest, width, height, source_stride, glFormat);
+        }
+
+        public void ClearAlpha(byte* src, uint width, uint height, byte alpha)
+        {
+            __Internal.ClearAlpha(__Instance, src, width, height, alpha);
         }
 
         public void MemcpySse2(__IntPtr dst, __IntPtr src, ulong size)
@@ -5476,6 +5676,23 @@ namespace Spout.Interop
             __Internal.Bgra2bgr(__Instance, bgra_source, bgr_dest, width, height, bInvert);
         }
 
+        public void GetSSE(ref bool bSSE2, ref bool bSSE3, ref bool bSSSE3)
+        {
+            fixed (bool* __bSSE20 = &bSSE2)
+            {
+                var __arg0 = __bSSE20;
+                fixed (bool* __bSSE31 = &bSSE3)
+                {
+                    var __arg1 = __bSSE31;
+                    fixed (bool* __bSSSE32 = &bSSSE3)
+                    {
+                        var __arg2 = __bSSSE32;
+                        __Internal.GetSSE(__Instance, __arg0, __arg1, __arg2);
+                    }
+                }
+            }
+        }
+
         protected void CheckSSE()
         {
             __Internal.CheckSSE(__Instance);
@@ -5494,6 +5711,11 @@ namespace Spout.Interop
         protected void RgbaBgraSse3(__IntPtr rgba_source, __IntPtr bgra_dest, uint width, uint height, bool bInvert)
         {
             __Internal.RgbaBgraSse3(__Instance, rgba_source, bgra_dest, width, height, bInvert);
+        }
+
+        protected void RgbaSwapSsse3(__IntPtr rgbasource, uint width, uint height)
+        {
+            __Internal.RgbaSwapSsse3(__Instance, rgbasource, width, height);
         }
 
         protected bool MBSSE2
@@ -5534,11 +5756,38 @@ namespace Spout.Interop
                 ((__Internal*)__Instance)->m_bSSSE3 = (byte) (value ? 1 : 0);
             }
         }
+
+        public bool SSE2
+        {
+            get
+            {
+                var ___ret = __Internal.GetSSE2(__Instance);
+                return ___ret;
+            }
+        }
+
+        public bool SSE3
+        {
+            get
+            {
+                var ___ret = __Internal.GetSSE3(__Instance);
+                return ___ret;
+            }
+        }
+
+        public bool SSSE3
+        {
+            get
+            {
+                var ___ret = __Internal.GetSSSE3(__Instance);
+                return ___ret;
+            }
+        }
     }
 
     public unsafe partial class SpoutGL : IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 1712)]
+        [StructLayout(LayoutKind.Sequential, Size = 1744)]
         public partial struct __Internal
         {
             internal __IntPtr vfptr_spoutGL;
@@ -5547,10 +5796,13 @@ namespace Spout.Interop
             internal global::Spout.Interop.SpoutSenderNames.__Internal sendernames;
             internal global::Spout.Interop.SpoutFrameCount.__Internal frame;
             internal global::Spout.Interop.SpoutSharedMemory.__Internal memoryshare;
+            internal int m_nBuffers;
             internal fixed uint m_pbo[4];
             internal int PboIndex;
             internal int NextPboIndex;
-            internal int m_nBuffers;
+            internal fixed uint m_loadpbo[4];
+            internal int PboLoadIndex;
+            internal int NextPboLoadIndex;
             internal fixed long m_pStaging[2];
             internal int m_Index;
             internal int m_NextIndex;
@@ -5563,6 +5815,8 @@ namespace Spout.Interop
             internal uint m_TexWidth;
             internal uint m_TexHeight;
             internal uint m_TexFormat;
+            internal uint m_DestWidth;
+            internal uint m_DestHeight;
             internal uint m_glTexture;
             internal __IntPtr m_pSharedTexture;
             internal __IntPtr m_dxShareHandle;
@@ -5579,8 +5833,7 @@ namespace Spout.Interop
             internal byte m_bConnected;
             internal byte m_bUpdated;
             internal byte m_bInitialized;
-            internal byte m_bMirror;
-            internal byte m_bSwapRB;
+            internal byte m_bSender;
             internal byte m_bGLDXdone;
             internal byte m_bAuto;
             internal byte m_bCPU;
@@ -5634,12 +5887,22 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool SetVerticalSync(__IntPtr __instance, int interval);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?InitTexture@spoutGL@@QEAAXAEAIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void InitTexture(__IntPtr __instance, uint* texID, uint GLformat, uint width, uint height);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CopyTexture@spoutGL@@QEAA_NIIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool CopyTexture(__IntPtr __instance, uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ReadTextureData@spoutGL@@QEAA_NIIPEAXIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool ReadTextureData(__IntPtr __instance, uint SourceID, uint SourceTarget, __IntPtr data, uint width, uint height, uint rowpitch, uint dataformat, uint datatype, bool bInvert, uint HostFBO);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?RemovePadding@spoutGL@@QEAAXPEBEPEAEIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void RemovePadding(__IntPtr __instance, byte* source, byte* dest, uint width, uint height, uint stride, uint glFormat);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ClearAlpha@spoutGL@@QEAAXPEAEIIE@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ClearAlpha(__IntPtr __instance, byte* src, uint width, uint height, byte alpha);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?OpenSpout@spoutGL@@QEAA_N_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -5657,10 +5920,6 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GLformatName@spoutGL@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void GLformatName(__IntPtr __instance, __IntPtr @return, int glformat);
-
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CreateOpenGL@spoutGL@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
-            [return: MarshalAs(UnmanagedType.I1)]
-            internal static extern bool CreateOpenGL(__IntPtr __instance);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CloseOpenGL@spoutGL@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -5687,9 +5946,6 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?LinkGLDXtextures@spoutGL@@QEAAPEAXPEAX0I@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr LinkGLDXtextures(__IntPtr __instance, __IntPtr pDXdevice, __IntPtr pSharedTexture, uint glTextureID);
 
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?InitTexture@spoutGL@@QEAAXAEAIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
-            internal static extern void InitTexture(__IntPtr __instance, uint* texID, uint GLformat, uint width, uint height);
-
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WriteDX11texture@spoutGL@@QEAA_NIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool WriteDX11texture(__IntPtr __instance, uint TextureID, uint TextureTarget, uint width, uint height, bool bInvert, uint HostFBO);
@@ -5702,9 +5958,9 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool UnloadTexturePixels(__IntPtr __instance, uint TextureID, uint TextureTarget, uint width, uint height, uint pitch, byte* data, uint glFormat, bool bInvert, uint HostFBO);
 
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ReadTexturePixels@spoutGL@@QEAA_NIIIIPEAXIH@Z", CallingConvention = __CallingConvention.Cdecl)]
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?LoadTexturePixels@spoutGL@@QEAA_NIIIIPEBEH_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
-            internal static extern bool ReadTexturePixels(__IntPtr __instance, uint TextureID, uint TextureTarget, uint width, uint height, __IntPtr dest, uint GLformat, int nChannels);
+            internal static extern bool LoadTexturePixels(__IntPtr __instance, uint TextureID, uint TextureTarget, uint width, uint height, byte* data, int GLformat, bool bInvert);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WriteMemoryBuffer@spoutGL@@QEAA_NPEBD0H@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -5760,10 +6016,6 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool ReadGLDXpixels(__IntPtr __instance, byte* pixels, uint width, uint height, uint glFormat, bool bInvert, uint HostFBO);
 
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ReadTextureData@spoutGL@@IEAA_NIIIIIPEAEI_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
-            [return: MarshalAs(UnmanagedType.I1)]
-            internal static extern bool ReadTextureData(__IntPtr __instance, uint SourceID, uint SourceTarget, uint width, uint height, uint pitch, byte* dest, uint GLformat, bool bInvert, uint HostFBO);
-
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WriteDX11pixels@spoutGL@@IEAA_NPEBEIII_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool WriteDX11pixels(__IntPtr __instance, byte* pixels, uint width, uint height, uint glFormat, bool bInvert);
@@ -5794,9 +6046,6 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?trim@spoutGL@@IEAAXPEAD@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void Trim(__IntPtr __instance, sbyte* s);
-
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?DoDiagnostics@spoutGL@@IEAAXPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
-            internal static extern void DoDiagnostics(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string error);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?PrintFBOstatus@spoutGL@@IEAAXI@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void PrintFBOstatus(__IntPtr __instance, uint status);
@@ -5912,6 +6161,9 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?IsCONTEXTavailable@spoutGL@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool IsCONTEXTavailable(__IntPtr __instance);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetGLversion@spoutGL@@QEAAMXZ", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern float GetGLversion(__IntPtr __instance);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetInteropDevice@spoutGL@@QEAAPEAXXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr GetInteropDevice(__IntPtr __instance);
@@ -6083,15 +6335,35 @@ namespace Spout.Interop
             return ___ret;
         }
 
+        public void InitTexture(ref uint texID, uint GLformat, uint width, uint height)
+        {
+            fixed (uint* __texID0 = &texID)
+            {
+                var __arg0 = __texID0;
+                __Internal.InitTexture(__Instance, __arg0, GLformat, width, height);
+            }
+        }
+
         public bool CopyTexture(uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO)
         {
             var ___ret = __Internal.CopyTexture(__Instance, SourceID, SourceTarget, DestID, DestTarget, width, height, bInvert, HostFBO);
             return ___ret;
         }
 
+        public bool ReadTextureData(uint SourceID, uint SourceTarget, __IntPtr data, uint width, uint height, uint rowpitch, uint dataformat, uint datatype, bool bInvert, uint HostFBO)
+        {
+            var ___ret = __Internal.ReadTextureData(__Instance, SourceID, SourceTarget, data, width, height, rowpitch, dataformat, datatype, bInvert, HostFBO);
+            return ___ret;
+        }
+
         public void RemovePadding(byte* source, byte* dest, uint width, uint height, uint stride, uint glFormat)
         {
             __Internal.RemovePadding(__Instance, source, dest, width, height, stride, glFormat);
+        }
+
+        public void ClearAlpha(byte* src, uint width, uint height, byte alpha)
+        {
+            __Internal.ClearAlpha(__Instance, src, width, height, alpha);
         }
 
         public bool OpenSpout(bool bRetest)
@@ -6125,12 +6397,6 @@ namespace Spout.Interop
             var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
             __basicStringRet0.Dispose();
             return __retString0;
-        }
-
-        public bool CreateOpenGL()
-        {
-            var ___ret = __Internal.CreateOpenGL(__Instance);
-            return ___ret;
         }
 
         public bool CloseOpenGL()
@@ -6173,15 +6439,6 @@ namespace Spout.Interop
             return ___ret;
         }
 
-        public void InitTexture(ref uint texID, uint GLformat, uint width, uint height)
-        {
-            fixed (uint* __texID0 = &texID)
-            {
-                var __arg0 = __texID0;
-                __Internal.InitTexture(__Instance, __arg0, GLformat, width, height);
-            }
-        }
-
         public bool WriteDX11texture(uint TextureID, uint TextureTarget, uint width, uint height, bool bInvert, uint HostFBO)
         {
             var ___ret = __Internal.WriteDX11texture(__Instance, TextureID, TextureTarget, width, height, bInvert, HostFBO);
@@ -6200,9 +6457,9 @@ namespace Spout.Interop
             return ___ret;
         }
 
-        public bool ReadTexturePixels(uint TextureID, uint TextureTarget, uint width, uint height, __IntPtr dest, uint GLformat, int nChannels)
+        public bool LoadTexturePixels(uint TextureID, uint TextureTarget, uint width, uint height, byte* data, int GLformat, bool bInvert)
         {
-            var ___ret = __Internal.ReadTexturePixels(__Instance, TextureID, TextureTarget, width, height, dest, GLformat, nChannels);
+            var ___ret = __Internal.LoadTexturePixels(__Instance, TextureID, TextureTarget, width, height, data, GLformat, bInvert);
             return ___ret;
         }
 
@@ -6298,12 +6555,6 @@ namespace Spout.Interop
             return ___ret;
         }
 
-        protected bool ReadTextureData(uint SourceID, uint SourceTarget, uint width, uint height, uint pitch, byte* dest, uint GLformat, bool bInvert, uint HostFBO)
-        {
-            var ___ret = __Internal.ReadTextureData(__Instance, SourceID, SourceTarget, width, height, pitch, dest, GLformat, bInvert, HostFBO);
-            return ___ret;
-        }
-
         protected bool WriteDX11pixels(byte* pixels, uint width, uint height, uint glFormat, bool bInvert)
         {
             var ___ret = __Internal.WriteDX11pixels(__Instance, pixels, width, height, glFormat, bInvert);
@@ -6349,11 +6600,6 @@ namespace Spout.Interop
         protected void Trim(sbyte* s)
         {
             __Internal.Trim(__Instance, s);
-        }
-
-        protected void DoDiagnostics(string error)
-        {
-            __Internal.DoDiagnostics(__Instance, error);
         }
 
         protected void PrintFBOstatus(uint status)
@@ -6436,6 +6682,19 @@ namespace Spout.Interop
             }
         }
 
+        protected int MNBuffers
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->m_nBuffers;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->m_nBuffers = value;
+            }
+        }
+
         protected uint[] MPbo
         {
             get
@@ -6479,18 +6738,51 @@ namespace Spout.Interop
             }
         }
 
-        protected int MNBuffers
+        protected uint[] MLoadpbo
         {
             get
             {
-                return ((__Internal*)__Instance)->m_nBuffers;
+                return CppSharp.Runtime.MarshalUtil.GetArray<uint>(((__Internal*)__Instance)->m_loadpbo, 4);
             }
 
             set
             {
-                ((__Internal*)__Instance)->m_nBuffers = value;
+                if (value != null)
+                {
+                    for (int i = 0; i < 4; i++)
+                        ((__Internal*)__Instance)->m_loadpbo[i] = value[i];
+                }
             }
         }
+
+        protected int PboLoadIndex
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->PboLoadIndex;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->PboLoadIndex = value;
+            }
+        }
+
+        protected int NextPboLoadIndex
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->NextPboLoadIndex;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->NextPboLoadIndex = value;
+            }
+        }
+
+        // ID3D11Texture2D was not declared by CppSharp, but this is internal (not
+        // part of the Spout2 API docs) so for Spout.NETCore we just comment it out.
 
         //protected global::ID3D11Texture2D[] MPStaging
         //{
@@ -6669,6 +6961,32 @@ namespace Spout.Interop
             }
         }
 
+        protected uint MDestWidth
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->m_DestWidth;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->m_DestWidth = value;
+            }
+        }
+
+        protected uint MDestHeight
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->m_DestHeight;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->m_DestHeight = value;
+            }
+        }
+
         protected uint MGlTexture
         {
             get
@@ -6799,29 +7117,16 @@ namespace Spout.Interop
             }
         }
 
-        protected bool MBMirror
+        protected bool MBSender
         {
             get
             {
-                return ((__Internal*)__Instance)->m_bMirror != 0;
+                return ((__Internal*)__Instance)->m_bSender != 0;
             }
 
             set
             {
-                ((__Internal*)__Instance)->m_bMirror = (byte) (value ? 1 : 0);
-            }
-        }
-
-        protected bool MBSwapRB
-        {
-            get
-            {
-                return ((__Internal*)__Instance)->m_bSwapRB != 0;
-            }
-
-            set
-            {
-                ((__Internal*)__Instance)->m_bSwapRB = (byte) (value ? 1 : 0);
+                ((__Internal*)__Instance)->m_bSender = (byte) (value ? 1 : 0);
             }
         }
 
@@ -7373,6 +7678,15 @@ namespace Spout.Interop
             }
         }
 
+        public float GLversion
+        {
+            get
+            {
+                var ___ret = __Internal.GetGLversion(__Instance);
+                return ___ret;
+            }
+        }
+
         public __IntPtr InteropDevice
         {
             get
@@ -7473,7 +7787,7 @@ namespace Spout.Interop
 
     public unsafe partial class SpoutReceiver : IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 1976)]
+        [StructLayout(LayoutKind.Sequential, Size = 2008)]
         public partial struct __Internal
         {
             internal global::Spout.Interop.Spout.__Internal spout;
@@ -7527,6 +7841,9 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableFrameSync@SpoutReceiver@@QEAAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void EnableFrameSync(__IntPtr __instance, bool bSync);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CloseFrameSync@SpoutReceiver@@QEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void CloseFrameSync(__IntPtr __instance);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ReadMemoryBuffer@SpoutReceiver@@QEAAHPEBDPEADH@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern int ReadMemoryBuffer(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string name, sbyte* data, int maxlength);
@@ -7605,6 +7922,9 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool SetVerticalSync(__IntPtr __instance, bool bSync);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSDKversion@SpoutReceiver@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEAH@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void GetSDKversion(__IntPtr __instance, __IntPtr @return, int* pNumber);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CreateOpenGL@SpoutReceiver@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool CreateOpenGL(__IntPtr __instance);
@@ -7616,6 +7936,10 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CopyTexture@SpoutReceiver@@QEAA_NIIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool CopyTexture(__IntPtr __instance, uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ReadTextureData@SpoutReceiver@@QEAA_NIIPEAXIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool ReadTextureData(__IntPtr __instance, uint SourceID, uint SourceTarget, __IntPtr data, uint width, uint height, uint rowpitch, uint dataformat, uint datatype, bool bInvert, uint HostFBO);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GLformat@SpoutReceiver@@QEAAHII@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern int GLformat(__IntPtr __instance, uint TextureID, uint TextureTarget);
@@ -7776,9 +8100,6 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetVerticalSync@SpoutReceiver@@QEAAHXZ", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern int GetVerticalSync(__IntPtr __instance);
-
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSpoutVersion@SpoutReceiver@@QEAAHXZ", CallingConvention = __CallingConvention.Cdecl)]
-            internal static extern int GetSpoutVersion(__IntPtr __instance);
         }
 
         public __IntPtr __Instance { get; protected set; }
@@ -7955,6 +8276,11 @@ namespace Spout.Interop
             __Internal.EnableFrameSync(__Instance, bSync);
         }
 
+        public void CloseFrameSync()
+        {
+            __Internal.CloseFrameSync(__Instance);
+        }
+
         public int ReadMemoryBuffer(string name, sbyte* data, int maxlength)
         {
             var ___ret = __Internal.ReadMemoryBuffer(__Instance, name, data, maxlength);
@@ -8087,6 +8413,20 @@ namespace Spout.Interop
             return ___ret;
         }
 
+        public string GetSDKversion(ref int pNumber)
+        {
+            fixed (int* __pNumber0 = &pNumber)
+            {
+                var __arg0 = __pNumber0;
+                var ___ret = new global::Std.BasicString.__Internalc__N_std_S_basic_string__C___N_std_S_char_traits__C___N_std_S_allocator__C();
+                __Internal.GetSDKversion(__Instance, new IntPtr(&___ret), __arg0);
+                var __basicStringRet0 = global::Std.BasicString<sbyte, global::Std.CharTraits<sbyte>, global::Std.Allocator<sbyte>>.__CreateInstance(new __IntPtr(&___ret));
+                var __retString0 = global::Std.BasicStringExtensions.Data(__basicStringRet0);
+                __basicStringRet0.Dispose();
+                return __retString0;
+            }
+        }
+
         public bool CreateOpenGL()
         {
             var ___ret = __Internal.CreateOpenGL(__Instance);
@@ -8102,6 +8442,12 @@ namespace Spout.Interop
         public bool CopyTexture(uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO)
         {
             var ___ret = __Internal.CopyTexture(__Instance, SourceID, SourceTarget, DestID, DestTarget, width, height, bInvert, HostFBO);
+            return ___ret;
+        }
+
+        public bool ReadTextureData(uint SourceID, uint SourceTarget, __IntPtr data, uint width, uint height, uint rowpitch, uint dataformat, uint datatype, bool bInvert, uint HostFBO)
+        {
+            var ___ret = __Internal.ReadTextureData(__Instance, SourceID, SourceTarget, data, width, height, rowpitch, dataformat, datatype, bInvert, HostFBO);
             return ___ret;
         }
 
@@ -8540,20 +8886,11 @@ namespace Spout.Interop
                 return ___ret;
             }
         }
-
-        public int SpoutVersion
-        {
-            get
-            {
-                var ___ret = __Internal.GetSpoutVersion(__Instance);
-                return ___ret;
-            }
-        }
     }
 
     public unsafe partial class SpoutSender : IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 1976)]
+        [StructLayout(LayoutKind.Sequential, Size = 2008)]
         public partial struct __Internal
         {
             internal global::Spout.Interop.Spout.__Internal spout;
@@ -8606,6 +8943,9 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?EnableFrameSync@SpoutSender@@QEAAX_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void EnableFrameSync(__IntPtr __instance, bool bSync);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CloseFrameSync@SpoutSender@@QEAAXXZ", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void CloseFrameSync(__IntPtr __instance);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WriteMemoryBuffer@SpoutSender@@QEAA_NPEBD0H@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -8704,6 +9044,10 @@ namespace Spout.Interop
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CopyTexture@SpoutSender@@QEAA_NIIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool CopyTexture(__IntPtr __instance, uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ReadTextureData@SpoutSender@@QEAA_NIIPEAXIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool ReadTextureData(__IntPtr __instance, uint SourceID, uint SourceTarget, __IntPtr data, uint width, uint height, uint rowpitch, uint dataformat, uint datatype, bool bInvert, uint HostFBO);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GLformat@SpoutSender@@QEAAHII@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern int GLformat(__IntPtr __instance, uint TextureID, uint TextureTarget);
@@ -9015,6 +9359,11 @@ namespace Spout.Interop
             __Internal.EnableFrameSync(__Instance, bSync);
         }
 
+        public void CloseFrameSync()
+        {
+            __Internal.CloseFrameSync(__Instance);
+        }
+
         public bool WriteMemoryBuffer(string name, string data, int length)
         {
             var ___ret = __Internal.WriteMemoryBuffer(__Instance, name, data, length);
@@ -9174,6 +9523,12 @@ namespace Spout.Interop
         public bool CopyTexture(uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO)
         {
             var ___ret = __Internal.CopyTexture(__Instance, SourceID, SourceTarget, DestID, DestTarget, width, height, bInvert, HostFBO);
+            return ___ret;
+        }
+
+        public bool ReadTextureData(uint SourceID, uint SourceTarget, __IntPtr data, uint width, uint height, uint rowpitch, uint dataformat, uint datatype, bool bInvert, uint HostFBO)
+        {
+            var ___ret = __Internal.ReadTextureData(__Instance, SourceID, SourceTarget, data, width, height, rowpitch, dataformat, datatype, bInvert, HostFBO);
             return ___ret;
         }
 
@@ -9593,7 +9948,7 @@ namespace Spout.Interop.__Symbols
         public static IntPtr _glDeleteSyncEXT__3P6AXPEAU__GLsync___ZEA { get; }
         public static IntPtr _glFenceSyncEXT__3P6APEAU__GLsync__II_ZEA { get; }
         public static IntPtr _glCopyImageSubData__3P6AXIIHHHHIIHHHHHHH_ZEA { get; }
-        public static IntPtr _glGetInternalFormativ__3P6AXIIIHPEAH_ZEA { get; }
+        public static IntPtr _glGetInternalformativ__3P6AXIIIHPEAH_ZEA { get; }
         public static IntPtr _glCreateProgram__3P6AIXZEA { get; }
         public static IntPtr _glCreateShader__3P6AII_ZEA { get; }
         public static IntPtr _glShaderSource__3P6AXIHPEBQEBDPEBH_ZEA { get; }
@@ -9625,6 +9980,9 @@ namespace Spout.Interop.__Symbols
         public static IntPtr _glBufferStorageMemEXT__3P6AXI_JI_K_ZEA { get; }
         public static IntPtr _glMemoryObjectParameterivEXT__3P6AXIIPEBH_ZEA { get; }
         public static IntPtr _glGetMemoryObjectParameterivEXT__3P6AXIIPEAH_ZEA { get; }
+        public static IntPtr _glIsMemoryObjectEXT__3P6AEI_ZEA { get; }
+        public static IntPtr _glCreateBuffers__3P6AXHPEAI_ZEA { get; }
+        public static IntPtr _glBindBufferBase__3P6AXIII_ZEA { get; }
         static Spout_Interop_dll()
         {
             var path = "Spout.Interop.dll";
@@ -9672,7 +10030,7 @@ namespace Spout.Interop.__Symbols
             _glDeleteSyncEXT__3P6AXPEAU__GLsync___ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glDeleteSyncEXT@@3P6AXPEAU__GLsync@@@ZEA");
             _glFenceSyncEXT__3P6APEAU__GLsync__II_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glFenceSyncEXT@@3P6APEAU__GLsync@@II@ZEA");
             _glCopyImageSubData__3P6AXIIHHHHIIHHHHHHH_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glCopyImageSubData@@3P6AXIIHHHHIIHHHHHHH@ZEA");
-            _glGetInternalFormativ__3P6AXIIIHPEAH_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glGetInternalFormativ@@3P6AXIIIHPEAH@ZEA");
+            _glGetInternalformativ__3P6AXIIIHPEAH_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glGetInternalformativ@@3P6AXIIIHPEAH@ZEA");
             _glCreateProgram__3P6AIXZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glCreateProgram@@3P6AIXZEA");
             _glCreateShader__3P6AII_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glCreateShader@@3P6AII@ZEA");
             _glShaderSource__3P6AXIHPEBQEBDPEBH_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glShaderSource@@3P6AXIHPEBQEBDPEBH@ZEA");
@@ -9704,6 +10062,9 @@ namespace Spout.Interop.__Symbols
             _glBufferStorageMemEXT__3P6AXI_JI_K_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glBufferStorageMemEXT@@3P6AXI_JI_K@ZEA");
             _glMemoryObjectParameterivEXT__3P6AXIIPEBH_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glMemoryObjectParameterivEXT@@3P6AXIIPEBH@ZEA");
             _glGetMemoryObjectParameterivEXT__3P6AXIIPEAH_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glGetMemoryObjectParameterivEXT@@3P6AXIIPEAH@ZEA");
+            _glIsMemoryObjectEXT__3P6AEI_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glIsMemoryObjectEXT@@3P6AEI@ZEA");
+            _glCreateBuffers__3P6AXHPEAI_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glCreateBuffers@@3P6AXHPEAI@ZEA");
+            _glBindBufferBase__3P6AXIII_ZEA = CppSharp.SymbolResolver.ResolveSymbol(image, "?glBindBufferBase@@3P6AXIII@ZEA");
         }
     }
 }

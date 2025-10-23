@@ -7,10 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spout.NETCore", "Spout.NETC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A5F2CF73-17F8-4F9A-B489-4A002DA7B6AA}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spout.NETCoreTests", "Spout.NETCoreTests\Spout.NETCoreTests.csproj", "{CD978F34-FF10-42AC-B071-22ADE7B83239}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateBindings", "GenerateBindings\GenerateBindings.csproj", "{F577D2FC-7006-6F27-EE22-E918784D66E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +29,10 @@ Global
 		{CD978F34-FF10-42AC-B071-22ADE7B83239}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD978F34-FF10-42AC-B071-22ADE7B83239}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD978F34-FF10-42AC-B071-22ADE7B83239}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F577D2FC-7006-6F27-EE22-E918784D66E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F577D2FC-7006-6F27-EE22-E918784D66E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F577D2FC-7006-6F27-EE22-E918784D66E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F577D2FC-7006-6F27-EE22-E918784D66E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
