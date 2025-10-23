@@ -16,7 +16,7 @@ namespace Spout.Interop
 {
     public unsafe partial class Spout : global::Spout.Interop.SpoutGL, IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 2000)]
+        [StructLayout(LayoutKind.Sequential, Size = 2008)]
         public new partial struct __Internal
         {
             internal __IntPtr vfptr_spoutGL;
@@ -44,6 +44,8 @@ namespace Spout.Interop
             internal uint m_TexWidth;
             internal uint m_TexHeight;
             internal uint m_TexFormat;
+            internal uint m_DestWidth;
+            internal uint m_DestHeight;
             internal uint m_glTexture;
             internal __IntPtr m_pSharedTexture;
             internal __IntPtr m_dxShareHandle;
@@ -5785,7 +5787,7 @@ namespace Spout.Interop
 
     public unsafe partial class SpoutGL : IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 1736)]
+        [StructLayout(LayoutKind.Sequential, Size = 1744)]
         public partial struct __Internal
         {
             internal __IntPtr vfptr_spoutGL;
@@ -5813,6 +5815,8 @@ namespace Spout.Interop
             internal uint m_TexWidth;
             internal uint m_TexHeight;
             internal uint m_TexFormat;
+            internal uint m_DestWidth;
+            internal uint m_DestHeight;
             internal uint m_glTexture;
             internal __IntPtr m_pSharedTexture;
             internal __IntPtr m_dxShareHandle;
@@ -5883,6 +5887,9 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool SetVerticalSync(__IntPtr __instance, int interval);
 
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?InitTexture@spoutGL@@QEAAXAEAIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void InitTexture(__IntPtr __instance, uint* texID, uint GLformat, uint width, uint height);
+
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CopyTexture@spoutGL@@QEAA_NIIIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool CopyTexture(__IntPtr __instance, uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO);
@@ -5893,6 +5900,9 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?RemovePadding@spoutGL@@QEAAXPEBEPEAEIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void RemovePadding(__IntPtr __instance, byte* source, byte* dest, uint width, uint height, uint stride, uint glFormat);
+
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?ClearAlpha@spoutGL@@QEAAXPEAEIIE@Z", CallingConvention = __CallingConvention.Cdecl)]
+            internal static extern void ClearAlpha(__IntPtr __instance, byte* src, uint width, uint height, byte alpha);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?OpenSpout@spoutGL@@QEAA_N_N@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -5935,9 +5945,6 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?LinkGLDXtextures@spoutGL@@QEAAPEAXPEAX0I@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern __IntPtr LinkGLDXtextures(__IntPtr __instance, __IntPtr pDXdevice, __IntPtr pSharedTexture, uint glTextureID);
-
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?InitTexture@spoutGL@@QEAAXAEAIIII@Z", CallingConvention = __CallingConvention.Cdecl)]
-            internal static extern void InitTexture(__IntPtr __instance, uint* texID, uint GLformat, uint width, uint height);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?WriteDX11texture@spoutGL@@QEAA_NIIII_NI@Z", CallingConvention = __CallingConvention.Cdecl)]
             [return: MarshalAs(UnmanagedType.I1)]
@@ -6039,9 +6046,6 @@ namespace Spout.Interop
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?trim@spoutGL@@IEAAXPEAD@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void Trim(__IntPtr __instance, sbyte* s);
-
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout.Interop.dll", EntryPoint = "?DoDiagnostics@spoutGL@@IEAAXPEBD@Z", CallingConvention = __CallingConvention.Cdecl)]
-            internal static extern void DoDiagnostics(__IntPtr __instance, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CppSharp.Runtime.UTF8Marshaller))] string error);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?PrintFBOstatus@spoutGL@@IEAAXI@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void PrintFBOstatus(__IntPtr __instance, uint status);
@@ -6331,6 +6335,15 @@ namespace Spout.Interop
             return ___ret;
         }
 
+        public void InitTexture(ref uint texID, uint GLformat, uint width, uint height)
+        {
+            fixed (uint* __texID0 = &texID)
+            {
+                var __arg0 = __texID0;
+                __Internal.InitTexture(__Instance, __arg0, GLformat, width, height);
+            }
+        }
+
         public bool CopyTexture(uint SourceID, uint SourceTarget, uint DestID, uint DestTarget, uint width, uint height, bool bInvert, uint HostFBO)
         {
             var ___ret = __Internal.CopyTexture(__Instance, SourceID, SourceTarget, DestID, DestTarget, width, height, bInvert, HostFBO);
@@ -6346,6 +6359,11 @@ namespace Spout.Interop
         public void RemovePadding(byte* source, byte* dest, uint width, uint height, uint stride, uint glFormat)
         {
             __Internal.RemovePadding(__Instance, source, dest, width, height, stride, glFormat);
+        }
+
+        public void ClearAlpha(byte* src, uint width, uint height, byte alpha)
+        {
+            __Internal.ClearAlpha(__Instance, src, width, height, alpha);
         }
 
         public bool OpenSpout(bool bRetest)
@@ -6419,15 +6437,6 @@ namespace Spout.Interop
         {
             var ___ret = __Internal.LinkGLDXtextures(__Instance, pDXdevice, pSharedTexture, glTextureID);
             return ___ret;
-        }
-
-        public void InitTexture(ref uint texID, uint GLformat, uint width, uint height)
-        {
-            fixed (uint* __texID0 = &texID)
-            {
-                var __arg0 = __texID0;
-                __Internal.InitTexture(__Instance, __arg0, GLformat, width, height);
-            }
         }
 
         public bool WriteDX11texture(uint TextureID, uint TextureTarget, uint width, uint height, bool bInvert, uint HostFBO)
@@ -6591,11 +6600,6 @@ namespace Spout.Interop
         protected void Trim(sbyte* s)
         {
             __Internal.Trim(__Instance, s);
-        }
-
-        protected void DoDiagnostics(string error)
-        {
-            __Internal.DoDiagnostics(__Instance, error);
         }
 
         protected void PrintFBOstatus(uint status)
@@ -6777,31 +6781,34 @@ namespace Spout.Interop
             }
         }
 
-        protected global::ID3D11Texture2D[] MPStaging
-        {
-            get
-            {
-                global::ID3D11Texture2D[] __value = null;
-                if (((__Internal*)__Instance)->m_pStaging != null)
-                {
-                    __value = new global::ID3D11Texture2D[2];
-                    for (int i = 0; i < 2; i++)
-                        __value[i] = global::ID3D11Texture2D.__CreateInstance((__IntPtr) ((__Internal*)__Instance)->m_pStaging[i]);
-                }
-                return __value;
-            }
+        // ID3D11Texture2D was not declared by CppSharp, but this is internal (not
+        // part of the Spout2 API docs) so for Spout.NETCore we just comment it out.
 
-            set
-            {
-                if (value != null)
-                {
-                    if (value.Length != 2)
-                        throw new ArgumentOutOfRangeException("value", "The dimensions of the provided array don't match the required size.");
-                    for (int i = 0; i < 2; i++)
-                        ((__Internal*)__Instance)->m_pStaging[i] = (long) value[i].__Instance;
-                }
-            }
-        }
+        //protected global::ID3D11Texture2D[] MPStaging
+        //{
+        //    get
+        //    {
+        //        global::ID3D11Texture2D[] __value = null;
+        //        if (((__Internal*)__Instance)->m_pStaging != null)
+        //        {
+        //            __value = new global::ID3D11Texture2D[2];
+        //            for (int i = 0; i < 2; i++)
+        //                __value[i] = global::ID3D11Texture2D.__CreateInstance((__IntPtr) ((__Internal*)__Instance)->m_pStaging[i]);
+        //        }
+        //        return __value;
+        //    }
+
+        //    set
+        //    {
+        //        if (value != null)
+        //        {
+        //            if (value.Length != 2)
+        //                throw new ArgumentOutOfRangeException("value", "The dimensions of the provided array don't match the required size.");
+        //            for (int i = 0; i < 2; i++)
+        //                ((__Internal*)__Instance)->m_pStaging[i] = (long) value[i].__Instance;
+        //        }
+        //    }
+        //}
 
         protected int MIndex
         {
@@ -6951,6 +6958,32 @@ namespace Spout.Interop
             set
             {
                 ((__Internal*)__Instance)->m_TexFormat = value;
+            }
+        }
+
+        protected uint MDestWidth
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->m_DestWidth;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->m_DestWidth = value;
+            }
+        }
+
+        protected uint MDestHeight
+        {
+            get
+            {
+                return ((__Internal*)__Instance)->m_DestHeight;
+            }
+
+            set
+            {
+                ((__Internal*)__Instance)->m_DestHeight = value;
             }
         }
 
@@ -7754,7 +7787,7 @@ namespace Spout.Interop
 
     public unsafe partial class SpoutReceiver : IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 2000)]
+        [StructLayout(LayoutKind.Sequential, Size = 2008)]
         public partial struct __Internal
         {
             internal global::Spout.Interop.Spout.__Internal spout;
@@ -7889,7 +7922,7 @@ namespace Spout.Interop
             [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool SetVerticalSync(__IntPtr __instance, bool bSync);
 
-            [SuppressUnmanagedCodeSecurity, DllImport("Spout.Interop.dll", EntryPoint = "?GetSDKversion@SpoutReceiver@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEAH@Z", CallingConvention = __CallingConvention.Cdecl)]
+            [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?GetSDKversion@SpoutReceiver@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEAH@Z", CallingConvention = __CallingConvention.Cdecl)]
             internal static extern void GetSDKversion(__IntPtr __instance, __IntPtr @return, int* pNumber);
 
             [SuppressUnmanagedCodeSecurity, DllImport("Spout", EntryPoint = "?CreateOpenGL@SpoutReceiver@@QEAA_NXZ", CallingConvention = __CallingConvention.Cdecl)]
@@ -8857,7 +8890,7 @@ namespace Spout.Interop
 
     public unsafe partial class SpoutSender : IDisposable
     {
-        [StructLayout(LayoutKind.Sequential, Size = 2000)]
+        [StructLayout(LayoutKind.Sequential, Size = 2008)]
         public partial struct __Internal
         {
             internal global::Spout.Interop.Spout.__Internal spout;
